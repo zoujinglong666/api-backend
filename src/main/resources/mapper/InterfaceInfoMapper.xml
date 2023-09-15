@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="generator.mapper.InterfaceInfoMapper">
+
+    <resultMap id="BaseResultMap" type="generator.domain.InterfaceInfo">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="createtime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updatetime" column="updateTime" jdbcType="TIMESTAMP"/>
+            <result property="idelete" column="iDelete" jdbcType="TINYINT"/>
+            <result property="requestheader" column="requestHeader" jdbcType="VARCHAR"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="url" column="url" jdbcType="VARCHAR"/>
+            <result property="method" column="method" jdbcType="VARCHAR"/>
+            <result property="reponseheader" column="reponseHeader" jdbcType="VARCHAR"/>
+            <result property="status" column="status" jdbcType="INTEGER"/>
+            <result property="userid" column="userId" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,createTime,updateTime,
+        iDelete,requestHeader,name,
+        url,method,reponseHeader,
+        status,userId
+    </sql>
+</mapper>
