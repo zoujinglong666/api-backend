@@ -27,19 +27,19 @@ public class InterfaceInfo implements Serializable {
     /**
      * 创建时间
      */
-    private Date createtime;
+    private Date createTime;
     /**
      * 更新时间
      */
-    private Date updatetime;
+    private Date updateTime;
     /**
      * 是否删除(0-未删, 1-已删)
      */
-    private Integer idelete;
+    private Integer isDelete;
     /**
      * 请求头
      */
-    private String requestheader;
+    private String requestHeader;
     /**
      * 用户名
      */
@@ -52,10 +52,11 @@ public class InterfaceInfo implements Serializable {
      * 用户名
      */
     private String method;
+    private String description;
     /**
      * 响应头
      */
-    private String reponseheader;
+    private String reponseHeader;
     /**
      * 接口状态
      */

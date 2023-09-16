@@ -12,8 +12,7 @@ import org.springframework.stereotype.Service;
  * @createDate 2023-09-15 22:23:02
  */
 @Service
-public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, InterfaceInfo>
-        implements InterfaceInfoService {
+public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, InterfaceInfo> implements InterfaceInfoService {
 
 }
 
