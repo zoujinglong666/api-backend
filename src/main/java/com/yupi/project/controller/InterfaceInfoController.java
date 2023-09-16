@@ -19,9 +19,7 @@ public class InterfaceInfoController {
 
     @PostMapping("/list")
     public BaseResponse<List<InterfaceInfoVo>> listInterfaceInfo() {
-
-
-        return ResultUtils.success(result);
+        return ResultUtils.success(null);
     }
 
 }

@@ -1,9 +1,9 @@
 package com.yupi.project.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yupi.project.mapper.InterfaceInfoMapper;
+import com.yupi.project.model.entity.InterfaceInfo;
 import com.yupi.project.service.InterfaceInfoService;
-import generator.domain.InterfaceInfo;
-import generator.mapper.InterfaceInfoMapper;
 import org.springframework.stereotype.Service;
 
 /**
