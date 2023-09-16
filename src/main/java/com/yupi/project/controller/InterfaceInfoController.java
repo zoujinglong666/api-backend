@@ -2,6 +2,7 @@ package com.yupi.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yupi.project.common.BaseResponse;
+import com.yupi.project.common.DeleteRequest;
 import com.yupi.project.common.ErrorCode;
 import com.yupi.project.common.ResultUtils;
 import com.yupi.project.exception.BusinessException;
@@ -65,6 +66,24 @@ public class InterfaceInfoController {
         }
         long newInterfaceInfoId = interfaceInfo.getId();
         return ResultUtils.success(newInterfaceInfoId);
+    }
+
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> deleteInterfaceInfo(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        long id = deleteRequest.getId();
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        User loginUser = userService.getLoginUser(request);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        if (!oldInterfaceInfo.getUserid().equals(loginUser.getId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        boolean result = interfaceInfoService.removeById(id);
+        return ResultUtils.success(result);
     }
 
 
