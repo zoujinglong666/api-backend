@@ -9,5 +9,6 @@ import com.yupi.project.model.entity.InterfaceInfo;
  * @createDate 2023-09-15 22:23:02
  */
 public interface InterfaceInfoService extends IService<InterfaceInfo> {
+    void valid(InterfaceInfo interfaceInfo, boolean add);
 
 }
