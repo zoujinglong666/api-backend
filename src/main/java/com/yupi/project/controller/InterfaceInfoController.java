@@ -154,16 +154,16 @@ public class InterfaceInfoController {
 
     @PostMapping("/removeIds")
     public BaseResponse<Boolean> removeInterfaceInfoByIds(@RequestBody List<Integer> list, HttpServletRequest request) {
-        if (list.size() == 0) {
+
+        List<Integer> integerList = list.stream().distinct().collect(Collectors.toList());
+        if (integerList.isEmpty()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean result = interfaceInfoService.removeByIds(list);
+        boolean result = interfaceInfoService.removeByIds(integerList);
         if (!result) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         return ResultUtils.success(result);
-
-
     }
 
 
