@@ -57,6 +57,7 @@ public class InterfaceInfo implements Serializable {
      * 响应头
      */
     private String reponseHeader;
+    private String type;
     /**
      * 接口状态
      */

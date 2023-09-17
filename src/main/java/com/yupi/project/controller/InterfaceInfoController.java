@@ -8,6 +8,7 @@ import com.yupi.project.common.ResultUtils;
 import com.yupi.project.exception.BusinessException;
 import com.yupi.project.model.dto.InterfaceInfo.InterfaceInfoAddRequest;
 import com.yupi.project.model.dto.InterfaceInfo.InterfaceInfoQueryRequest;
+import com.yupi.project.model.dto.InterfaceInfo.InterfaceInfoUpdateRequest;
 import com.yupi.project.model.entity.InterfaceInfo;
 import com.yupi.project.model.entity.User;
 import com.yupi.project.model.vo.InterfaceInfoVo;
@@ -58,7 +59,7 @@ public class InterfaceInfoController {
         BeanUtils.copyProperties(interfaceInfoAddRequest, interfaceInfo);
         // 校验
         interfaceInfoService.valid(interfaceInfo, true);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = getLoginUser(request);
         interfaceInfo.setUserid(loginUser.getId());
         boolean result = interfaceInfoService.save(interfaceInfo);
         if (!result) {
@@ -66,6 +67,34 @@ public class InterfaceInfoController {
         }
         long newInterfaceInfoId = interfaceInfo.getId();
         return ResultUtils.success(newInterfaceInfoId);
+    }
+
+    private User getLoginUser(HttpServletRequest request) {
+        return userService.getLoginUser(request);
+    }
+
+    @PostMapping("/update")
+    public BaseResponse<Long> addInterfaceInfo(@RequestBody InterfaceInfoUpdateRequest interfaceInfoUpdateRequest, HttpServletRequest request) {
+        if (interfaceInfoUpdateRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        BeanUtils.copyProperties(interfaceInfoUpdateRequest, interfaceInfo);
+        // 校验
+
+        Long oldId = interfaceInfoUpdateRequest.getId();
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(oldId);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long id = oldInterfaceInfo.getId();
+        if (!(oldId > 0 && oldId.equals(id))) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        interfaceInfoService.valid(interfaceInfo, false);
+        BeanUtils.copyProperties(interfaceInfoUpdateRequest, oldInterfaceInfo);
+        interfaceInfoService.updateById(oldInterfaceInfo);
+        return ResultUtils.success(oldId);
     }
 
     @PostMapping("/delete")
