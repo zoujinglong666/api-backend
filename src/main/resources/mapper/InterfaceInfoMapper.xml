@@ -15,14 +15,15 @@
         <result property="method" column="method" jdbcType="VARCHAR"/>
         <result property="reponseHeader" column="reponseHeader" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="INTEGER"/>
-        <result property="userid" column="userId" jdbcType="BIGINT"/>
+        <result property="userId" column="userId" jdbcType="BIGINT"/>
         <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="userRequestParams" column="userRequestParams" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List">
         id
         ,createTime,updateTime,
         isDelete,requestHeader,name,
         url,description,method,reponseHeader,
-        status,userId,type
+        status,userId,type,userRequestParams
     </sql>
 </mapper>

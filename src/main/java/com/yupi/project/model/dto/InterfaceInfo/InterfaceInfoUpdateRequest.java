@@ -35,5 +35,5 @@ public class InterfaceInfoUpdateRequest implements Serializable {
      */
     private String name;
     private Long id;
-
+    private String userRequestParams;
 }

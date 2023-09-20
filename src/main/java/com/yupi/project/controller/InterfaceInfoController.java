@@ -1,9 +1,11 @@
 package com.yupi.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.google.gson.Gson;
 import com.yupi.project.common.*;
 import com.yupi.project.exception.BusinessException;
 import com.yupi.project.model.dto.InterfaceInfo.InterfaceInfoAddRequest;
+import com.yupi.project.model.dto.InterfaceInfo.InterfaceInfoInvokeRequest;
 import com.yupi.project.model.dto.InterfaceInfo.InterfaceInfoQueryRequest;
 import com.yupi.project.model.dto.InterfaceInfo.InterfaceInfoUpdateRequest;
 import com.yupi.project.model.entity.InterfaceInfo;
@@ -12,6 +14,8 @@ import com.yupi.project.model.enums.InterfaceInfoStatusEnum;
 import com.yupi.project.model.vo.InterfaceInfoVo;
 import com.yupi.project.service.InterfaceInfoService;
 import com.yupi.project.service.UserService;
+import com.zou.zouapiclientsdk.client.ZouApiClient;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +34,16 @@ public class InterfaceInfoController {
     InterfaceInfoService interfaceInfoService;
     @Resource
     UserService userService;
+    @Resource
+    ZouApiClient zouApiClient;
+
+    private static long getIdResult(IdRequest idRequest) {
+        long id = idRequest.getId();
+        if (idRequest == null || id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        return id;
+    }
 
     @GetMapping("/list")
     public BaseResponse<List<InterfaceInfoVo>> listInterfaceInfo(InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
@@ -58,7 +72,7 @@ public class InterfaceInfoController {
         // 校验
         interfaceInfoService.valid(interfaceInfo, true);
         User loginUser = getLoginUser(request);
-        interfaceInfo.setUserid(loginUser.getId());
+        interfaceInfo.setUserId(loginUser.getId());
         boolean result = interfaceInfoService.save(interfaceInfo);
         if (!result) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR);
@@ -106,23 +120,34 @@ public class InterfaceInfoController {
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        if (!oldInterfaceInfo.getUserid().equals(loginUser.getId())) {
+        if (!oldInterfaceInfo.getUserId().equals(loginUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = interfaceInfoService.removeById(id);
         return ResultUtils.success(result);
     }
 
-    @PostMapping("/online")
-    public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest, HttpServletRequest request) {
-        if (idRequest == null || idRequest.getId() <= 0) {
+    @GetMapping("/get")
+    public BaseResponse<InterfaceInfo> getInterfaceInfoById(long id) {
+        if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        long id = idRequest.getId();
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        return ResultUtils.success(interfaceInfo);
+    }
+
+
+    @PostMapping("/online")
+    public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest, HttpServletRequest request) {
+        long id = getIdResult(idRequest);
         // 判断是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+
+        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.ON_LINE.getValue()) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "该接口已上线");
         }
         // 仅本人或管理员可修改
         InterfaceInfo interfaceInfo = new InterfaceInfo();
@@ -135,15 +160,17 @@ public class InterfaceInfoController {
 
     @PostMapping("/offline")
     public BaseResponse<Boolean> offlineInterfaceInfo(@RequestBody IdRequest idRequest, HttpServletRequest request) {
-        if (idRequest == null || idRequest.getId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        long id = idRequest.getId();
+        long id = getIdResult(idRequest);
+
         // 判断是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         if (oldInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
+        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFF_LINE.getValue()) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "该接口已下线");
+        }
+
         // 仅本人或管理员可修改
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
@@ -154,7 +181,6 @@ public class InterfaceInfoController {
 
     @PostMapping("/removeIds")
     public BaseResponse<Boolean> removeInterfaceInfoByIds(@RequestBody List<Integer> list, HttpServletRequest request) {
-
         List<Integer> integerList = list.stream().distinct().collect(Collectors.toList());
         if (integerList.isEmpty()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -164,6 +190,37 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         return ResultUtils.success(result);
+    }
+
+    @PostMapping("/invoke")
+    public BaseResponse<Object> invokeInterfaceInfoByIds(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest, HttpServletRequest request) {
+        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+
+        Long id = interfaceInfoInvokeRequest.getId();
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+
+        if (interfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFF_LINE.getValue()) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "该接口已下线");
+        }
+
+        User loginUser = getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        ZouApiClient client = new ZouApiClient(accessKey, secretKey);
+        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        if (StringUtils.isBlank(userRequestParams)) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "请求参数为空");
+        }
+        System.out.println(userRequestParams);
+        Gson gson = new Gson();
+        com.zou.zouapiclientsdk.model.User user = gson.fromJson(userRequestParams, com.zou.zouapiclientsdk.model.User.class);
+        String userNameByPost = client.getUserNameByPost(user);
+        return ResultUtils.success(userNameByPost);
+
+
     }
 
 

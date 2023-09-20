@@ -40,6 +40,7 @@ public class InterfaceInfo implements Serializable {
      * 请求头
      */
     private String requestHeader;
+    private String userRequestParams;
     /**
      * 用户名
      */
@@ -65,5 +66,5 @@ public class InterfaceInfo implements Serializable {
     /**
      *
      */
-    private Long userid;
+    private Long userId;
 }

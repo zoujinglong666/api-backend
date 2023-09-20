@@ -25,6 +25,7 @@ public class InterfaceInfoAddRequest implements Serializable {
      * 响应头
      */
     private String reponseHeader;
+    private String userRequestParams;
     /**
      * 请求类型
      */
